@@ -74,6 +74,7 @@ public class WordUtil {
 
     public static WordContent adaptDocxToPdfTable(File file) throws IOException {
         XWPFDocument docx = new XWPFDocument(new FileInputStream(file.getAbsoluteFile()));
+        System.out.println(docx.getDocument());
         return getWordContentByDocx(docx);
     }
 
@@ -143,7 +144,7 @@ public class WordUtil {
                             text.append(para.text());
                         }
                         WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, text.toString(), DEFAULT_FONT_SIZE,
-                                        x, y);
+                                x, y, null);
                         wordTableCellList.add(wordTableCell);
                     }
                     x += width;
@@ -191,7 +192,7 @@ public class WordUtil {
                     }
                     i = endIndex - 1;
                     // 过滤掉表格中所有不可见符号
-                    String tableOriginTextWithoutBlank = tableOriginText.toString().replaceAll(WORD_TABLE_FILTER, "");
+                    //String tableOriginTextWithoutBlank = tableOriginText.toString().replaceAll(WORD_TABLE_FILTER, "");
                     // 默认不加入表格中字体
                     // docText.append("<tb>").append(tableOriginTextWithoutBlank).append("</tb>").append("\n");
                 } catch (Exception e) {
@@ -213,6 +214,7 @@ public class WordUtil {
         while (it.hasNext()) {
             try {
                 XWPFTable table = it.next();
+                log.info("it.next() {}", table.toString());
                 WordTable wordTable = new WordTable();
                 List<WordTableCell> wordTableCellList = new ArrayList<>();
                 // 默认每个表格左上角的位置为(0,0)
@@ -236,6 +238,7 @@ public class WordUtil {
                         int currentRowHeight = getDocxRowHeight(table, i) / DEFAULT_DIV;
                         for (int j = 0, minCellNums = 0; j < colNums; j++) {
                             XWPFTableCell cell = table.getRow(i).getCell(j);
+                            log.info("cell0 {}",cell.getText());
                             int spanNumber = 1;
                             // 表示colspan
                             BigInteger girdSpanBigInteger;
@@ -254,10 +257,19 @@ public class WordUtil {
                             int width = widthByGrid / DEFAULT_DIV;
                             minCellNums += spanNumber;
 
+                            //判断textType 是文本类型 1-横向;2-竖向;3-多行文本
+                            String textType = null;
+                            if (StringUtils.isNotBlank(cell.getText())) {
+                                //默认先设置为横向文本类型
+                                textType = "1";
+
+                            }
+                            log.info("cell.getText() {}", cell.getText());
                             if (!docxIsContinue(cell)) {
+                                log.info("cell.getText() {}", cell.getText());
                                 int height = getDocxCellHeight(table, currentRowHeight, i, j);
                                 WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, cell.getText(),
-                                                DEFAULT_FONT_SIZE, x, y);
+                                        DEFAULT_FONT_SIZE, x, y, textType);
                                 wordTableCellList.add(wordTableCell);
                             }
                             x += width;
@@ -284,7 +296,7 @@ public class WordUtil {
                             if (!docxIsContinue(cell)) {
                                 int height = getDocxCellHeight(table, currentRowHeight, i, j);
                                 WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, cell.getText(),
-                                                DEFAULT_FONT_SIZE, x, y);
+                                        DEFAULT_FONT_SIZE, x, y, null);
                                 wordTableCellList.add(wordTableCell);
                             }
                             x += width;
@@ -346,7 +358,7 @@ public class WordUtil {
     }
 
     private static WordTableCell buildWordCellContent(Float height, Float width, String text, Float fontSize, Float x,
-                                               Float y) {
+                                                      Float y, String textType) {
         WordTableCell wordTableCell = new WordTableCell();
         wordTableCell.setHeight(height);
         wordTableCell.setWidth(width);
@@ -354,6 +366,7 @@ public class WordUtil {
         wordTableCell.setFontSize(fontSize);
         wordTableCell.setX(x);
         wordTableCell.setY(y);
+        wordTableCell.setTextType(textType);
         return wordTableCell;
     }
 
@@ -568,6 +581,28 @@ public class WordUtil {
             }
         }
         return -1;
+
+    }
+
+
+    public static void main(String[] args) {
+        // 顺序 Y00003B_rep
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        try {
+            WordContent wordContent = adaptDocxToPdfTable(file);
+            System.out.println(wordContent);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+/*        File file1 = new File("/Users/xuboyong/Documents/xuboyongTestdoc.doc");
+        WordContent wordContent = null;
+        try {
+            wordContent = wordExtractorService.adaptDocToPdfTable(file1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println(wordContent);*/
+
 
     }
 }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -433,6 +434,10 @@ public class Demo1 {
         CTJc cTJc = tablePr.addNewJc();
         //居中
         cTJc.setVal(STJc.CENTER);
+        table.setTopBorder(XWPFTable.XWPFBorderType.SINGLE,20,0,"");
+        table.setLeftBorder(XWPFTable.XWPFBorderType.SINGLE,20,0,"");
+        table.setRightBorder(XWPFTable.XWPFBorderType.SINGLE,20,0,"");
+        table.setBottomBorder(XWPFTable.XWPFBorderType.SINGLE,20,0, "");
         //列宽自动分割
         CTTblWidth tableWidth = tablePr.addNewTblW();
         //设置表格宽度
@@ -457,10 +462,17 @@ public class Demo1 {
                     paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
                     run = paragraphs.get(0).createRun();
                     run.setText(collect.get(i1).getText());
-                    run.setFontSize(collect.get(i1).getFontSize().intValue());
+                    //run.setFontSize(collect.get(i1).getFontSize().intValue());
+                    run.setFontSize((int) Math.round(10.5));
+                    if (i == 0 && i1 == 1){
+                    run.setFontSize(16);
+                    run.setBold(true);
+                    }else if (i == 0){
+                        run.setBold(true);
+                    }
                     run.setFontFamily("宋体");
                     run.setColor("000000");
-                    run.setBold(true);
+                    //run.setBold(true);
                     carRow.getCell(i1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
                     if (collect.size()<4){
                         mergeHorizontal(table,i,collect.size()-1,3);
