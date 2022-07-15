@@ -2,8 +2,12 @@ package com.kdgc.worddemo.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class WordTableCell {
+
+    private Integer id;
 
     private Float x;
 
@@ -14,11 +18,6 @@ public class WordTableCell {
     private Float height;
 
     private String text;
-
-    /**
-     * 文本类型 1-横向;2-竖向;3-多行文本
-     */
-    private String textType;
 
     /**
      * 默认为12
@@ -44,5 +43,11 @@ public class WordTableCell {
      * 列跨度 从1开始
      */
     private Integer colspan;
+
+    private String type;
+
+    private Date createTime;
+
+    private Integer tableNum;
 
 }

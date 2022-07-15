@@ -74,7 +74,6 @@ public class WordUtil {
 
     public static WordContent adaptDocxToPdfTable(File file) throws IOException {
         XWPFDocument docx = new XWPFDocument(new FileInputStream(file.getAbsoluteFile()));
-        System.out.println(docx.getDocument());
         return getWordContentByDocx(docx);
     }
 
@@ -144,7 +143,7 @@ public class WordUtil {
                             text.append(para.text());
                         }
                         WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, text.toString(), DEFAULT_FONT_SIZE,
-                                x, y, null);
+                                x, y);
                         wordTableCellList.add(wordTableCell);
                     }
                     x += width;
@@ -192,9 +191,9 @@ public class WordUtil {
                     }
                     i = endIndex - 1;
                     // 过滤掉表格中所有不可见符号
-                    //String tableOriginTextWithoutBlank = tableOriginText.toString().replaceAll(WORD_TABLE_FILTER, "");
+                    String tableOriginTextWithoutBlank = tableOriginText.toString().replaceAll(WORD_TABLE_FILTER, "");
                     // 默认不加入表格中字体
-                    // docText.append("<tb>").append(tableOriginTextWithoutBlank).append("</tb>").append("\n");
+                    docText.append("<tb>").append(tableOriginTextWithoutBlank).append("</tb>").append("\n");
                 } catch (Exception e) {
                     log.error("doc抽表数据与对应的表格位置不一致");
                 }
@@ -214,7 +213,6 @@ public class WordUtil {
         while (it.hasNext()) {
             try {
                 XWPFTable table = it.next();
-                log.info("it.next() {}", table.toString());
                 WordTable wordTable = new WordTable();
                 List<WordTableCell> wordTableCellList = new ArrayList<>();
                 // 默认每个表格左上角的位置为(0,0)
@@ -238,7 +236,8 @@ public class WordUtil {
                         int currentRowHeight = getDocxRowHeight(table, i) / DEFAULT_DIV;
                         for (int j = 0, minCellNums = 0; j < colNums; j++) {
                             XWPFTableCell cell = table.getRow(i).getCell(j);
-                            log.info("cell0 {}",cell.getText());
+                            //System.out.println(cell.getText());
+                            //log.info("cell0 {}",cell.getText());
                             int spanNumber = 1;
                             // 表示colspan
                             BigInteger girdSpanBigInteger;
@@ -257,20 +256,18 @@ public class WordUtil {
                             int width = widthByGrid / DEFAULT_DIV;
                             minCellNums += spanNumber;
 
-                            //判断textType 是文本类型 1-横向;2-竖向;3-多行文本
-                            String textType = null;
-                            if (StringUtils.isNotBlank(cell.getText())) {
-                                //默认先设置为横向文本类型
-                                textType = "1";
 
-                            }
-                            log.info("cell.getText() {}", cell.getText());
+
                             if (!docxIsContinue(cell)) {
-                                log.info("cell.getText() {}", cell.getText());
                                 int height = getDocxCellHeight(table, currentRowHeight, i, j);
-                                WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, cell.getText(),
-                                        DEFAULT_FONT_SIZE, x, y, textType);
-                                wordTableCellList.add(wordTableCell);
+                                List<XWPFParagraph> paragraphs = table.getRow(i).getTableCells().get(j).getParagraphs();
+                                for (XWPFParagraph paragraph : paragraphs) {
+                                    System.out.println(paragraph.getText());
+                                    WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, paragraph.getText(),
+                                            DEFAULT_FONT_SIZE, x, y);
+                                    wordTableCellList.add(wordTableCell);
+                                }
+
                             }
                             x += width;
                         }
@@ -296,7 +293,7 @@ public class WordUtil {
                             if (!docxIsContinue(cell)) {
                                 int height = getDocxCellHeight(table, currentRowHeight, i, j);
                                 WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, cell.getText(),
-                                        DEFAULT_FONT_SIZE, x, y, null);
+                                        DEFAULT_FONT_SIZE, x, y);
                                 wordTableCellList.add(wordTableCell);
                             }
                             x += width;
@@ -312,11 +309,10 @@ public class WordUtil {
 
                 wordTable.setWordTableCellList(wordTableCellList);
                 allWordTableCellList.add(wordTable);
-                // 以下代码为为抽取的文字中加入表格文字
-                /*
-                String originTableText = "<tb>\n" + table.getText().replaceAll(WORD_TABLE_FILTER, "") + "</tb>\n";
+                // 以下代码为抽取的文字中加入表格文字
+                String originTableText = "<tb>\n" + table.getText() + "</tb>\n";
+                //String originTableText = "<tb>\n" + table.getText().replaceAll(WORD_TABLE_FILTER, "") + "</tb>\n";
                 originTableTextList.add(originTableText);
-                */
             } catch (Exception e) {
                 log.error("docx表格解析错误", e);
             }
@@ -337,17 +333,16 @@ public class WordUtil {
                     continue;
                 }
                 // 将word中的特有字符转化为普通的换行符、空格符等
-                String textWithSameBlankAndBreak = text.replaceAll(WORD_BLANK, " ").replaceAll(WORD_LINE_BREAK, "\n")
-                        .replaceAll("\n+", "\n");
+                String textWithSameBlankAndBreak = text.replaceAll(WORD_BLANK, " ").replaceAll(WORD_LINE_BREAK, "\n").replaceAll("\n+", "\n");
                 // 去除word特有的不可见字符
-                String textClearBeginBlank = textWithSameBlankAndBreak.replaceAll(regexClearBeginBlank, "");
+                String textClearBeginBlank = textWithSameBlankAndBreak;
                 // 为抽取的每一个段落加上\n作为换行符标识
                 docxText.append(textClearBeginBlank).append("\n");
             } else if (element instanceof XWPFTable) {
                 try {
                     // 获取表格中的原始文字 默认文字中不加入表格文字 取消注释可加入
-                    /*String text = originTableTextList.get(count);
-                    docxText.append(text);*/
+                    String text = originTableTextList.get(count);
+                    docxText.append(text);
                     count++;
                 } catch (Exception e) {
                     log.error("docx抽表数据与对应的表格位置不一致");
@@ -358,7 +353,7 @@ public class WordUtil {
     }
 
     private static WordTableCell buildWordCellContent(Float height, Float width, String text, Float fontSize, Float x,
-                                                      Float y, String textType) {
+                                                      Float y) {
         WordTableCell wordTableCell = new WordTableCell();
         wordTableCell.setHeight(height);
         wordTableCell.setWidth(width);
@@ -366,7 +361,6 @@ public class WordUtil {
         wordTableCell.setFontSize(fontSize);
         wordTableCell.setX(x);
         wordTableCell.setY(y);
-        wordTableCell.setTextType(textType);
         return wordTableCell;
     }
 

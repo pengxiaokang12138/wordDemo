@@ -6,8 +6,10 @@ import com.kdgc.worddemo.entity.WordTable;
 import com.kdgc.worddemo.entity.WordTableCell;
 import com.kdgc.worddemo.util.CollectionUtilsPan;
 import com.kdgc.worddemo.util.WordUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.*;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -19,6 +21,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -27,10 +30,11 @@ import java.util.stream.Collectors;
  * 2022/7/8 17:39
  */
 @SpringBootTest
+@Slf4j
 public class Demo1 {
 
     @Test
-    void demo2() throws IOException {
+    public void demo2() throws IOException {
         XWPFDocument docx = new XWPFDocument();
         //3*4 表格
         XWPFTable table = docx.createTable(8, 4);
@@ -87,7 +91,7 @@ public class Demo1 {
         run0.setColor("000000");
         run0.setBold(true);
         //carRow0.getCell(2).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-        mergeHorizontal(table,0,2,3);
+        mergeHorizontal(table, 0, 2, 3);
 
 
         //========================================第二行===================================
@@ -231,7 +235,7 @@ public class Demo1 {
         run3.setColor("000000");
         run3.setBold(true);
         carRow3.getCell(1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-        mergeHorizontal(table,3,1,3);
+        mergeHorizontal(table, 3, 1, 3);
 
         //========================================第五行===================================
         XWPFTableRow carRow4 = table.getRow(4);
@@ -265,7 +269,7 @@ public class Demo1 {
         run4.setColor("000000");
         run4.setBold(true);
         carRow4.getCell(1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-        mergeHorizontal(table,4,1,3);
+        mergeHorizontal(table, 4, 1, 3);
 
         //========================================第六行===================================
         XWPFTableRow carRow5 = table.getRow(5);
@@ -299,7 +303,7 @@ public class Demo1 {
         run5.setColor("000000");
         run5.setBold(true);
         carRow5.getCell(1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-        mergeHorizontal(table,5,1,3);
+        mergeHorizontal(table, 5, 1, 3);
 
         //========================================第七行===================================
         XWPFTableRow carRow6 = table.getRow(6);
@@ -342,7 +346,7 @@ public class Demo1 {
         run6.setColor("000000");
         run6.setBold(true);
         carRow6.getCell(2).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-        mergeHorizontal(table,6,2,3);
+        mergeHorizontal(table, 6, 2, 3);
 
         //========================================第八行===================================
         XWPFTableRow carRow7 = table.getRow(7);
@@ -397,7 +401,7 @@ public class Demo1 {
         run7.setColor("000000");
         run7.setBold(true);
         carRow7.getCell(2).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-        mergeHorizontal(table,7,2,3);
+        mergeHorizontal(table, 7, 2, 3);
 
 
         /*//合并列
@@ -412,9 +416,10 @@ public class Demo1 {
     }
 
     @Test
-    void demo03() throws IOException {
+    public void demo03() throws IOException {
         File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
         WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
+        System.out.println(wordContent.getText());
         List<WordTable> wordTableList = wordContent.getWordTableList();
         int allRow = 0;
         Float allWidth = 0f;
@@ -434,10 +439,10 @@ public class Demo1 {
         CTJc cTJc = tablePr.addNewJc();
         //居中
         cTJc.setVal(STJc.CENTER);
-        table.setTopBorder(XWPFTable.XWPFBorderType.SINGLE,20,0,"");
-        table.setLeftBorder(XWPFTable.XWPFBorderType.SINGLE,20,0,"");
-        table.setRightBorder(XWPFTable.XWPFBorderType.SINGLE,20,0,"");
-        table.setBottomBorder(XWPFTable.XWPFBorderType.SINGLE,20,0, "");
+        table.setTopBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setLeftBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setRightBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setBottomBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
         //列宽自动分割
         CTTblWidth tableWidth = tablePr.addNewTblW();
         //设置表格宽度
@@ -449,33 +454,68 @@ public class Demo1 {
                 List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
                 int finalI = i;
                 List<WordTableCell> collect = wordTableCellList.stream().filter(WordTableCell -> Objects.equals(WordTableCell.getRow(), finalI)).collect(Collectors.toList());
+
+                for (WordTableCell wc : collect) {
+                    if (wc.getText() == "" || "".equals(wc.getText())) {
+                        wc.setText("\n");
+                    }
+                }
+
+
+                Map<Integer, Map<Integer, List<WordTableCell>>> collect1 = wordTableCellList.stream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.groupingBy(WordTableCell::getCol)));
+                System.out.println(collect1);
+
                 XWPFTableRow carRow = table.getRow(i);
                 //第几个单元格
                 for (int i1 = 0; i1 < collect.size(); i1++) {
-                    List<XWPFParagraph> paragraphs = carRow.getCell(i1).getParagraphs();
+                    List<XWPFParagraph> paragraphs = null;
+                    try {
+                        paragraphs = carRow.getCell(i1).getParagraphs();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    log.info("显示,{}", carRow.getCell(i1));
                     //设置单元格高度
                     carRow.setHeight(collect.get(i1).getHeight().intValue());
                     //设置单元格宽度
                     carRow.getCell(i1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(collect.get(i1).getWidth().intValue()));
-                    XWPFRun run = paragraphs.get(0).createRun();
-                    paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
-                    paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
-                    run = paragraphs.get(0).createRun();
-                    run.setText(collect.get(i1).getText());
-                    //run.setFontSize(collect.get(i1).getFontSize().intValue());
-                    run.setFontSize((int) Math.round(10.5));
-                    if (i == 0 && i1 == 1){
-                    run.setFontSize(16);
-                    run.setBold(true);
-                    }else if (i == 0){
-                        run.setBold(true);
+                    if (paragraphs != null) {
+                        XWPFRun run = paragraphs.get(0).createRun();
+                        paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
+                        paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
+                        run = paragraphs.get(0).createRun();
+                        //System.out.println(collect.get(i1).getText());
+                        run.setText(collect.get(i1).getText());
+                        run.setFontSize((int) Math.round(10.5));
+                        if (i == 0 && i1 == 1) {
+                            run.setFontSize(16);
+                            run.setBold(true);
+                        } else if (i == 0) {
+                            run.setBold(true);
+                        }
+                        run.setFontFamily("宋体");
+                        run.setColor("000000");
+                        //run.setBold(true);
+                    } else {
+                        XWPFParagraph paragraph = carRow.getCell(i1).addParagraph();
+                        paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
+                        paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
+                        XWPFRun run = paragraph.createRun();
+                        run.setText("\n");
+                        run.setFontSize((int) Math.round(10.5));
+                        if (i == 0 && i1 == 1) {
+                            run.setFontSize(16);
+                            run.setBold(true);
+                        } else if (i == 0) {
+                            run.setBold(true);
+                        }
+                        run.setFontFamily("宋体");
+                        run.setColor("000000");
+                        //run.setBold(true);
                     }
-                    run.setFontFamily("宋体");
-                    run.setColor("000000");
-                    //run.setBold(true);
                     carRow.getCell(i1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-                    if (collect.size()<4){
-                        mergeHorizontal(table,i,collect.size()-1,3);
+                    if (collect.size() < 4) {
+                        mergeHorizontal(table, i, collect.size() - 1, 3);
                     }
                 }
             }
@@ -484,7 +524,6 @@ public class Demo1 {
         docx.write(os);
         os.close();
     }
-
 
 
     //合并列
@@ -500,11 +539,12 @@ public class Demo1 {
         //合并后垂直居中
         table.getRow(fromRow).getCell(col).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
     }
+
     //合并行
     public void mergeHorizontal(XWPFTable table, int row, int fromCell, int toCell) {
         for (int cellIndex = fromCell; cellIndex <= toCell; cellIndex++) {
             XWPFTableCell cell = table.getRow(row).getCell(cellIndex);
-            if ( cellIndex == fromCell ) {
+            if (cellIndex == fromCell) {
                 cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.RESTART);
             } else {
                 cell.getCTTc().addNewTcPr().addNewHMerge().setVal(STMerge.CONTINUE);

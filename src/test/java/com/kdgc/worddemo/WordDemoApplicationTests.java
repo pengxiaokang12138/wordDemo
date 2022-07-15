@@ -1,9 +1,8 @@
 package com.kdgc.worddemo;
 
-import cn.afterturn.easypoi.word.WordExportUtil;
-import com.spire.doc.FileFormat;
+
 import org.apache.poi.xwpf.usermodel.*;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.IfProfileValue;

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kdgc.worddemo.mapper.WordTableCellMapper">
+    <resultMap id="BaseResultMap" type="com.kdgc.worddemo.entity.WordTableCell">
+        <!--@mbg.generated-->
+        <!--@Table word_table_cell-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="x" jdbcType="FLOAT" property="x"/>
+        <result column="y" jdbcType="FLOAT" property="y"/>
+        <result column="width" jdbcType="FLOAT" property="width"/>
+        <result column="height" jdbcType="FLOAT" property="height"/>
+        <result column="text" jdbcType="VARCHAR" property="text"/>
+        <result column="font_size" jdbcType="FLOAT" property="fontSize"/>
+        <result column="row" jdbcType="INTEGER" property="row"/>
+        <result column="col" jdbcType="INTEGER" property="col"/>
+        <result column="rowspan" jdbcType="INTEGER" property="rowspan"/>
+        <result column="colspan" jdbcType="INTEGER" property="colspan"/>
+        <result column="type" jdbcType="VARCHAR" property="type"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, x, y, width, height, `text`, font_size, `row`, col, rowspan, colspan, `type`,
+        create_time
+    </sql>
+    <insert id="insert" parameterType="com.kdgc.worddemo.entity.WordTableCell">
+        <!--@mbg.generated-->
+        insert into word_table_cell (x, y, width, height,
+                                     `text`, font_size, `row`,
+                                     col, rowspan, colspan,
+                                     `type`, create_time)
+        values (#{x,jdbcType=FLOAT}, #{y,jdbcType=FLOAT}, #{width,jdbcType=FLOAT}, #{height,jdbcType=FLOAT},
+                #{text,jdbcType=VARCHAR}, #{fontSize,jdbcType=FLOAT}, #{row,jdbcType=INTEGER},
+                #{col,jdbcType=INTEGER}, #{rowspan,jdbcType=INTEGER}, #{colspan,jdbcType=INTEGER},
+                #{type,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+    </insert>
+</mapper>
