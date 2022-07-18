@@ -1,5 +1,6 @@
 package com.kdgc.worddemo.util;
 
+import com.kdgc.worddemo.entity.Student;
 import com.kdgc.worddemo.entity.WordContent;
 import com.kdgc.worddemo.entity.WordTable;
 import com.kdgc.worddemo.entity.WordTableCell;
@@ -18,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * pxk
@@ -210,6 +212,7 @@ public class WordUtil {
         Iterator<XWPFTable> it = docx.getTablesIterator();
         // 抽取表中的文字集合
         List<String> originTableTextList = new ArrayList<>();
+        Integer value;
         while (it.hasNext()) {
             try {
                 XWPFTable table = it.next();
@@ -256,18 +259,15 @@ public class WordUtil {
                             int width = widthByGrid / DEFAULT_DIV;
                             minCellNums += spanNumber;
 
-
-
                             if (!docxIsContinue(cell)) {
                                 int height = getDocxCellHeight(table, currentRowHeight, i, j);
-                                List<XWPFParagraph> paragraphs = table.getRow(i).getTableCells().get(j).getParagraphs();
+                                value = width + height;
+                                List<XWPFParagraph> paragraphs = cell.getParagraphs();
                                 for (XWPFParagraph paragraph : paragraphs) {
-                                    System.out.println(paragraph.getText());
-                                    WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, paragraph.getText(),
+                                    WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, paragraph.getText() + "\n",
                                             DEFAULT_FONT_SIZE, x, y);
                                     wordTableCellList.add(wordTableCell);
                                 }
-
                             }
                             x += width;
                         }
@@ -306,6 +306,13 @@ public class WordUtil {
                         y += currentRowHeight;
                     }
                 }
+//                List<WordTableCell> finalList = new ArrayList<>();
+//                wordTableCellList.stream().collect(Collectors.groupingBy(o -> (o.getWidth()+o.getHeight()),Collectors.toList())).forEach((id,transfer) -> {
+//                     transfer.stream().reduce((a,b) -> new WordTableCell(a.getId(),a.getX(),a.getY(),a.getWidth(),a.getHeight(),a.getText()+b.getText(),a.getFontSize(),a.getRow(),a.getCol(),a.getRowspan(),a.getColspan(),
+//                             a.getType(),a.getCreateTime(),a.getTableNum())).ifPresent(finalList::add);
+//                });
+
+
 
                 wordTable.setWordTableCellList(wordTableCellList);
                 allWordTableCellList.add(wordTable);

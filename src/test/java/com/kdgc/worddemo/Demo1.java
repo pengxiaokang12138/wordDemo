@@ -1,6 +1,7 @@
 package com.kdgc.worddemo;
 
 
+import com.kdgc.worddemo.entity.Student;
 import com.kdgc.worddemo.entity.WordContent;
 import com.kdgc.worddemo.entity.WordTable;
 import com.kdgc.worddemo.entity.WordTableCell;
@@ -10,14 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.*;
 import org.junit.Test;
+import org.openxmlformats.schemas.presentationml.x2006.main.CTTLCommonBehaviorData;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.xml.transform.Source;
 import java.awt.*;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -418,63 +418,52 @@ public class Demo1 {
     @Test
     public void demo03() throws IOException {
         File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        //首先拿到最外层的对象
         WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
-        System.out.println(wordContent.getText());
+        //取出最外层对象中的表格集合
         List<WordTable> wordTableList = wordContent.getWordTableList();
+        //拿到表格总共多少行 和 表格的宽度
         int allRow = 0;
         Float allWidth = 0f;
-        //拿到总共多少行 最外层表格的宽度
         for (WordTable wordTable : wordTableList) {
             allWidth = wordTable.getWidth();
             List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
             List<WordTableCell> collect = wordTableCellList.stream().filter(CollectionUtilsPan.distinctByKey(WordTableCell::getRow)).collect(Collectors.toList());
             allRow = collect.size();
         }
+        //创建word对象
         XWPFDocument docx = new XWPFDocument();
         //创建表格
         XWPFTable table = docx.createTable(allRow, 4);
-        //表格属性
+        //获取表格属性
         CTTblPr tablePr = table.getCTTbl().addNewTblPr();
         //表格宽度
         CTJc cTJc = tablePr.addNewJc();
         //居中
         cTJc.setVal(STJc.CENTER);
+        //设置上下左右页边距
         table.setTopBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
         table.setLeftBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
         table.setRightBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
         table.setBottomBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
         //列宽自动分割
         CTTblWidth tableWidth = tablePr.addNewTblW();
-        //设置表格宽度
+        //设置表格宽度且自适应调整
         tableWidth.setType(STTblWidth.DXA);
         tableWidth.setW(BigInteger.valueOf(allWidth.intValue()));
-        //第几行
+        //allRow为表格的总行数
         for (int i = 0; i < allRow; i++) {
             for (WordTable wordTable : wordTableList) {
+                //拿出单元格集合
                 List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
+                //拿出同行不同列的单元格集合
                 int finalI = i;
                 List<WordTableCell> collect = wordTableCellList.stream().filter(WordTableCell -> Objects.equals(WordTableCell.getRow(), finalI)).collect(Collectors.toList());
-
-                for (WordTableCell wc : collect) {
-                    if (wc.getText() == "" || "".equals(wc.getText())) {
-                        wc.setText("\n");
-                    }
-                }
-
-
-                Map<Integer, Map<Integer, List<WordTableCell>>> collect1 = wordTableCellList.stream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.groupingBy(WordTableCell::getCol)));
-                System.out.println(collect1);
-
+                //拿出同行
                 XWPFTableRow carRow = table.getRow(i);
                 //第几个单元格
                 for (int i1 = 0; i1 < collect.size(); i1++) {
-                    List<XWPFParagraph> paragraphs = null;
-                    try {
-                        paragraphs = carRow.getCell(i1).getParagraphs();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    log.info("显示,{}", carRow.getCell(i1));
+                    List<XWPFParagraph> paragraphs = carRow.getCell(i1).getParagraphs();
                     //设置单元格高度
                     carRow.setHeight(collect.get(i1).getHeight().intValue());
                     //设置单元格宽度
@@ -523,6 +512,103 @@ public class Demo1 {
         FileOutputStream os = new FileOutputStream("C:\\Users\\pengxiaokang\\Desktop\\demo03.docx");
         docx.write(os);
         os.close();
+    }
+
+
+    @Test
+    public void demo04() throws IOException {
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        //首先拿到最外层的对象
+        WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
+        //取出最外层对象中的表格集合
+        List<WordTable> wordTableList = wordContent.getWordTableList();
+        //拿到表格总共多少行 和 表格的宽度
+        int allRow = 0;
+        Float allWidth = 0f;
+        for (WordTable wordTable : wordTableList) {
+            allWidth = wordTable.getWidth();
+            List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
+            Map<Integer, Map<Integer, List<WordTableCell>>> collect1 =
+                    wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.groupingBy(WordTableCell::getCol)));
+            allRow = collect1.size();
+        }
+        //创建word对象
+        XWPFDocument docx = new XWPFDocument();
+        //创建表格
+        XWPFTable table = docx.createTable(allRow, 4);
+        //获取表格属性
+        CTTblPr tablePr = table.getCTTbl().addNewTblPr();
+        //表格宽度
+        CTJc cTJc = tablePr.addNewJc();
+        //居中
+        cTJc.setVal(STJc.CENTER);
+        //设置上下左右页边距
+        table.setTopBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setLeftBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setRightBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setBottomBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        //列宽自动分割
+        CTTblWidth tableWidth = tablePr.addNewTblW();
+        //设置表格宽度且自适应调整
+        tableWidth.setType(STTblWidth.DXA);
+        tableWidth.setW(BigInteger.valueOf(allWidth.intValue()));
+        //allRow为表格的总行数
+        for (int i = 0; i < allRow; i++) {
+            for (WordTable wordTable : wordTableList) {
+                //拿出单元格集合
+                List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
+                //同行同列的单元格集合  resultList
+                Map<Integer, Map<Integer, List<WordTableCell>>> collect1 =
+                        wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.groupingBy(WordTableCell::getCol)));
+                List<List<WordTableCell>> resultList = new ArrayList<>();
+                collect1.forEach((k1, v1) -> {
+                    v1.forEach((k2, v2) -> {
+                        resultList.add(v2);
+                    });
+                });
+                for (List<WordTableCell> wordTableCells : resultList) {
+                    int finalI = i;
+                    List<WordTableCell> collect = wordTableCells.stream().filter(WordTableCell -> Objects.equals(WordTableCell.getRow(), finalI)).collect(Collectors.toList());
+                    System.out.println(collect);
+                    Map<Integer, List<WordTableCell>> collect2 = collect.parallelStream().collect(Collectors.groupingBy(WordTableCell::getCol));
+                    List<WordTableCell> list = new ArrayList();
+                    collect2.forEach((k,v) -> {
+                        list.addAll(v);
+                    });
+                     log.info("未处理前list + {}" ,list);
+                }
+            }
+        }
+        FileOutputStream os = new FileOutputStream("C:\\Users\\pengxiaokang\\Desktop\\demo04.docx");
+        docx.write(os);
+        os.close();
+    }
+
+    @Test
+     public void demo05(){
+        List<Student> list=new ArrayList<>();
+        list.add(new Student(1,"张三","60.50"));
+        list.add(new Student(1,"张三","70.25"));
+        list.add(new Student(1,"张三","80.25"));
+        list.add(new Student(2,"李四","60"));
+        System.out.println(list);
+        List<Student> studentList=new ArrayList<>();
+        list.parallelStream().collect(Collectors.groupingBy(o -> (o.getUid()+o.getUname()),Collectors.toList())).forEach((id,transfer)->{
+            transfer.stream().reduce((a,b)->new Student(a.getUid(),a.getUname(),a.getScore()+b.getScore())).ifPresent(studentList::add);
+        });
+        for (Student student : studentList) {
+            System.out.println(student);
+        }
+    }
+
+    @Test
+    public void demo06() throws IOException {
+        String path = "C:\\Users\\pengxiaokang\\Desktop\\模板01.docx";
+        File file = new File(path);
+        InputStream is = new FileInputStream(file);
+        XWPFDocument docx = new XWPFDocument(is);
+        System.out.println(docx.getDocument());
+
     }
 
 
