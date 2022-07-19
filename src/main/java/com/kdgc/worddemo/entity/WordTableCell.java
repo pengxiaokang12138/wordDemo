@@ -50,5 +50,4 @@ public class WordTableCell {
 
     private Integer tableNum;
 
-
 }

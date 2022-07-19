@@ -264,7 +264,7 @@ public class WordUtil {
                                 value = width + height;
                                 List<XWPFParagraph> paragraphs = cell.getParagraphs();
                                 for (XWPFParagraph paragraph : paragraphs) {
-                                    WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, paragraph.getText() + "\n",
+                                    WordTableCell wordTableCell = buildWordCellContent((float) height, (float) width, paragraph.getText(),
                                             DEFAULT_FONT_SIZE, x, y);
                                     wordTableCellList.add(wordTableCell);
                                 }
@@ -306,15 +306,47 @@ public class WordUtil {
                         y += currentRowHeight;
                     }
                 }
-//                List<WordTableCell> finalList = new ArrayList<>();
-//                wordTableCellList.stream().collect(Collectors.groupingBy(o -> (o.getWidth()+o.getHeight()),Collectors.toList())).forEach((id,transfer) -> {
-//                     transfer.stream().reduce((a,b) -> new WordTableCell(a.getId(),a.getX(),a.getY(),a.getWidth(),a.getHeight(),a.getText()+b.getText(),a.getFontSize(),a.getRow(),a.getCol(),a.getRowspan(),a.getColspan(),
-//                             a.getType(),a.getCreateTime(),a.getTableNum())).ifPresent(finalList::add);
-//                });
+
+                //System.out.println(wordTableCellList);
+                LinkedHashMap<String,List<WordTableCell>> stringListMap = new LinkedHashMap<>();
+                for (WordTableCell wordTableCell : wordTableCellList) {
+                    String code  = (wordTableCell.getX() +"-"+ wordTableCell.getY());
+                    List<WordTableCell> list = stringListMap.get(code);
+                    if (list == null){
+                        List<WordTableCell> list2 = new ArrayList<>();
+                        list2.add(wordTableCell);
+                        stringListMap.put(code,list2);
+                    }else {
+                        list.add(wordTableCell);
+                        stringListMap.put(code,list);
+                    }
+                }
+                //System.out.println(stringListMap);
+                Set<Map.Entry<String, List<WordTableCell>>> entries = stringListMap.entrySet();
+                Iterator<Map.Entry<String, List<WordTableCell>>> iterator = entries.iterator();
+                List<WordTableCell> resultList = new ArrayList<>();
+                while (iterator.hasNext()){
+                    Map.Entry<String, List<WordTableCell>> next = iterator.next();
+                    List<WordTableCell> value1 = next.getValue();
+                    String result = "";
+                    WordTableCell resultObject = new WordTableCell();
+                    for (WordTableCell wordTableCell : value1) {
+                        result += wordTableCell.getText() + "\n";
+                        resultObject.setX(wordTableCell.getX());
+                        resultObject.setY(wordTableCell.getY());
+                        resultObject.setWidth(wordTableCell.getWidth());
+                        resultObject.setHeight(wordTableCell.getHeight());
+                    }
+                    //System.out.println(result);
+                    String substring = result.substring(0, result.length() - 1);
+                    //System.out.println(substring);
+                    resultObject.setText(substring);
+                    resultList.add(resultObject);
+                }
+                //System.out.println(resultList);
 
 
-
-                wordTable.setWordTableCellList(wordTableCellList);
+                wordTable.setWordTableCellList(resultList);
                 allWordTableCellList.add(wordTable);
                 // 以下代码为抽取的文字中加入表格文字
                 String originTableText = "<tb>\n" + table.getText() + "</tb>\n";
@@ -588,7 +620,7 @@ public class WordUtil {
 
     public static void main(String[] args) {
         // 顺序 Y00003B_rep
-        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\模板01.docx");
         try {
             WordContent wordContent = adaptDocxToPdfTable(file);
             System.out.println(wordContent);

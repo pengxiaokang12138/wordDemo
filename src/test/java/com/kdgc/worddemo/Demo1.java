@@ -1,6 +1,7 @@
 package com.kdgc.worddemo;
 
 
+import com.alibaba.druid.pool.DruidDataSource;
 import com.kdgc.worddemo.entity.Student;
 import com.kdgc.worddemo.entity.WordContent;
 import com.kdgc.worddemo.entity.WordTable;
@@ -10,6 +11,7 @@ import com.kdgc.worddemo.util.WordUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xwpf.usermodel.*;
+import org.apache.xmlbeans.XmlCursor;
 import org.junit.Test;
 import org.openxmlformats.schemas.presentationml.x2006.main.CTTLCommonBehaviorData;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
@@ -19,10 +21,8 @@ import javax.xml.transform.Source;
 import java.awt.*;
 import java.io.*;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -58,15 +58,37 @@ public class Demo1 {
         carRow0.getCell(0).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(1828));
         //以创建段落的方式给单元格赋值
         List<XWPFParagraph> paragraphs0 = carRow0.getCell(0).getParagraphs();
+//        String[] result = {"SH3503－"};
+//        for (int i = 0; i < result.length; i++) {
+//            XmlCursor cursor = paragraphs0.get(0).getCTP().newCursor();
+//            XWPFParagraph newParagraph = carRow0.getCell(0).insertNewParagraph(cursor);
+//            newParagraph.setAlignment(ParagraphAlignment.CENTER);
+//            newParagraph.getCTP().insertNewR(0).insertNewT(0).setStringValue(result[i]);
+//            newParagraph.setNumID(paragraphs0.get(0).getNumID());
+//        }
+
         paragraphs0.get(0).setAlignment(ParagraphAlignment.CENTER);
         paragraphs0.get(0).setVerticalAlignment(TextAlignment.CENTER);
         XWPFRun run0 = paragraphs0.get(0).createRun();
-        run0.setText("SH3503－J105");
-        run0.setFontSize(11);
+        run0.setText("J105");
+        run0.setFontSize(45);
         run0.setFontFamily("宋体");
         run0.setColor("000000");
         run0.setBold(true);
         carRow0.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor = paragraphs0.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph = carRow0.getCell(0).insertNewParagraph(cursor);
+        newParagraph.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run11 = newParagraph.createRun();
+        run11.setText("SH3503－");
+        run11.setFontSize(20);
+        run11.setFontFamily("宋体");
+        run11.setColor("000000");
+        run11.setBold(true);
+        carRow0.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
 
         carRow0.getCell(1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(3600));
         paragraphs0 = carRow0.getCell(1).getParagraphs();
@@ -214,15 +236,62 @@ public class Demo1 {
         //以创建段落的方式给单元格赋值
         paragraphs3.get(0).setAlignment(ParagraphAlignment.CENTER);
         paragraphs3.get(0).setVerticalAlignment(TextAlignment.CENTER);
-        run3.setText("工\n" +
-                "程\n" +
-                "内\n" +
-                "容\n");
+        run3.setText("容");
         run3.setFontSize(11);
         run3.setFontFamily("宋体");
         run3.setColor("000000");
         run3.setBold(true);
         carRow3.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+
+        XmlCursor cursor3 = paragraphs3.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph3 = carRow3.getCell(0).insertNewParagraph(cursor3);
+        newParagraph3.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph3.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run13 = newParagraph3.createRun();
+        run13.setText("内");
+        run13.setFontSize(11);
+        run13.setFontFamily("宋体");
+        run13.setColor("000000");
+        run13.setBold(true);
+        carRow3.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor23 = paragraphs3.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph23 = carRow3.getCell(0).insertNewParagraph(cursor23);
+        newParagraph23.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph23.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run23 = newParagraph23.createRun();
+        run23.setText("程");
+        run23.setFontSize(11);
+        run23.setFontFamily("宋体");
+        run23.setColor("000000");
+        run23.setBold(true);
+        carRow3.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor33 = paragraphs3.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph33 = carRow3.getCell(0).insertNewParagraph(cursor33);
+        newParagraph33.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph33.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run33 = newParagraph33.createRun();
+        run33.setText("工");
+        run33.setFontSize(11);
+        run33.setFontFamily("宋体");
+        run33.setColor("000000");
+        run33.setBold(true);
+        carRow3.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+//
+//        XmlCursor cursor223 = paragraphs3.get(0).getCTP().newCursor();
+//        XWPFParagraph newParagraph223 = carRow3.getCell(0).insertNewParagraph(cursor223);
+//        newParagraph223.setAlignment(ParagraphAlignment.CENTER);
+//        newParagraph223.setVerticalAlignment(TextAlignment.CENTER);
+//        XWPFRun run123 = newParagraph3.createRun();
+//        run123.setText("工");
+//        run123.setFontSize(20);
+//        run123.setFontFamily("宋体");
+//        run123.setColor("000000");
+//        run123.setBold(true);
+//        carRow3.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
 
         carRow3.getCell(1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(8640));
         paragraphs3 = carRow3.getCell(1).getParagraphs();
@@ -248,14 +317,47 @@ public class Demo1 {
         //以创建段落的方式给单元格赋值
         paragraphs4.get(0).setAlignment(ParagraphAlignment.CENTER);
         paragraphs4.get(0).setVerticalAlignment(TextAlignment.CENTER);
-        run4.setText("开\n" +
-                "工\n" +
-                "条\n" +
-                "件\n");
+        run4.setText("件");
         run4.setFontSize(11);
         run4.setFontFamily("宋体");
         run4.setColor("000000");
         run4.setBold(true);
+        carRow4.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor41 = paragraphs4.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph41 = carRow4.getCell(0).insertNewParagraph(cursor41);
+        newParagraph41.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph41.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run41 = newParagraph41.createRun();
+        run41.setText("条");
+        run41.setFontSize(11);
+        run41.setFontFamily("宋体");
+        run41.setColor("000000");
+        run41.setBold(true);
+        carRow4.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor42 = paragraphs4.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph42 = carRow4.getCell(0).insertNewParagraph(cursor42);
+        newParagraph42.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph42.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run42 = newParagraph42.createRun();
+        run42.setText("工");
+        run42.setFontSize(11);
+        run42.setFontFamily("宋体");
+        run42.setColor("000000");
+        run42.setBold(true);
+        carRow4.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor43 = paragraphs4.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph43 = carRow4.getCell(0).insertNewParagraph(cursor43);
+        newParagraph43.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph43.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run43 = newParagraph43.createRun();
+        run43.setText("开");
+        run43.setFontSize(11);
+        run43.setFontFamily("宋体");
+        run43.setColor("000000");
+        run43.setBold(true);
         carRow4.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
 
         carRow4.getCell(1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(8640));
@@ -359,15 +461,47 @@ public class Demo1 {
         //以创建段落的方式给单元格赋值
         paragraphs7.get(0).setAlignment(ParagraphAlignment.CENTER);
         paragraphs7.get(0).setVerticalAlignment(TextAlignment.CENTER);
-        run7.setText("（公章）\n" +
-                " \n" +
-                "项目经理：\n" +
-                "\n" +
-                "年  月  日\n");
+        run7.setText("年  月  日");
         run7.setFontSize(11);
         run7.setFontFamily("宋体");
         run7.setColor("000000");
         run7.setBold(true);
+        carRow7.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor71 = paragraphs7.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph71 = carRow7.getCell(0).insertNewParagraph(cursor71);
+        newParagraph71.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph71.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run71 = newParagraph71.createRun();
+        run71.setText("项目经理");
+        run71.setFontSize(11);
+        run71.setFontFamily("宋体");
+        run71.setColor("000000");
+        run71.setBold(true);
+        carRow7.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor73 = paragraphs7.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph73 = carRow7.getCell(0).insertNewParagraph(cursor73);
+        newParagraph73.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph73.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run73 = newParagraph73.createRun();
+        run73.setText("");
+        run73.setFontSize(11);
+        run73.setFontFamily("宋体");
+        run73.setColor("000000");
+        run73.setBold(true);
+        carRow7.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+        XmlCursor cursor72 = paragraphs7.get(0).getCTP().newCursor();
+        XWPFParagraph newParagraph72 = carRow7.getCell(0).insertNewParagraph(cursor72);
+        newParagraph72.setAlignment(ParagraphAlignment.CENTER);
+        newParagraph72.setVerticalAlignment(TextAlignment.CENTER);
+        XWPFRun run72 = newParagraph72.createRun();
+        run72.setText("（公章）");
+        run72.setFontSize(11);
+        run72.setFontFamily("宋体");
+        run72.setColor("000000");
+        run72.setBold(true);
         carRow7.getCell(0).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
 
         carRow7.getCell(1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(3069));
@@ -413,11 +547,26 @@ public class Demo1 {
         FileOutputStream os = new FileOutputStream("C:\\Users\\pengxiaokang\\Desktop\\test01.docx");
         docx.write(os);
         os.close();
+
     }
+
+    private void createParagraphs(XWPFParagraph xwpfParagraph, String[] paragraphs, XWPFDocument document) {
+        if (xwpfParagraph != null) {
+            for (int i = 0; i < paragraphs.length; i++) {
+                XmlCursor cursor = xwpfParagraph.getCTP().newCursor();
+                XWPFParagraph newParagraph = document.insertNewParagraph(cursor);
+                newParagraph.setAlignment(ParagraphAlignment.CENTER);
+                newParagraph.getCTP().insertNewR(0).insertNewT(0).setStringValue(paragraphs[i]);
+                newParagraph.setNumID(xwpfParagraph.getNumID());
+            }
+            document.removeBodyElement(document.getPosOfParagraph(xwpfParagraph));
+        }
+    }
+
 
     @Test
     public void demo03() throws IOException {
-        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\模板01.docx");
         //首先拿到最外层的对象
         WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
         //取出最外层对象中的表格集合
@@ -528,14 +677,13 @@ public class Demo1 {
         for (WordTable wordTable : wordTableList) {
             allWidth = wordTable.getWidth();
             List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
-            Map<Integer, Map<Integer, List<WordTableCell>>> collect1 =
-                    wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.groupingBy(WordTableCell::getCol)));
-            allRow = collect1.size();
+            List<WordTableCell> collect = wordTableCellList.stream().filter(CollectionUtilsPan.distinctByKey(WordTableCell::getRow)).collect(Collectors.toList());
+            allRow = collect.size();
         }
         //创建word对象
         XWPFDocument docx = new XWPFDocument();
         //创建表格
-        XWPFTable table = docx.createTable(allRow, 4);
+        XWPFTable table = docx.createTable(allRow, 24);
         //获取表格属性
         CTTblPr tablePr = table.getCTTbl().addNewTblPr();
         //表格宽度
@@ -557,25 +705,37 @@ public class Demo1 {
             for (WordTable wordTable : wordTableList) {
                 //拿出单元格集合
                 List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
-                //同行同列的单元格集合  resultList
-                Map<Integer, Map<Integer, List<WordTableCell>>> collect1 =
-                        wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.groupingBy(WordTableCell::getCol)));
-                List<List<WordTableCell>> resultList = new ArrayList<>();
-                collect1.forEach((k1, v1) -> {
-                    v1.forEach((k2, v2) -> {
-                        resultList.add(v2);
-                    });
-                });
-                for (List<WordTableCell> wordTableCells : resultList) {
-                    int finalI = i;
-                    List<WordTableCell> collect = wordTableCells.stream().filter(WordTableCell -> Objects.equals(WordTableCell.getRow(), finalI)).collect(Collectors.toList());
-                    System.out.println(collect);
-                    Map<Integer, List<WordTableCell>> collect2 = collect.parallelStream().collect(Collectors.groupingBy(WordTableCell::getCol));
-                    List<WordTableCell> list = new ArrayList();
-                    collect2.forEach((k,v) -> {
-                        list.addAll(v);
-                    });
-                     log.info("未处理前list + {}" ,list);
+                //拿出同行不同列的单元格集合
+                int finalI = i;
+                List<WordTableCell> collect = wordTableCellList.stream().filter(WordTableCell -> Objects.equals(WordTableCell.getRow(), finalI)).collect(Collectors.toList());
+                //拿出同行
+                XWPFTableRow carRow = table.getRow(i);
+                //第几个单元格
+                for (int i1 = 0; i1 < collect.size(); i1++) {
+                    List<XWPFParagraph> paragraphs = carRow.getCell(i1).getParagraphs();
+                    //设置单元格高度
+                    carRow.setHeight(collect.get(i1).getHeight().intValue());
+                    //设置单元格宽度
+                    carRow.getCell(i1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(collect.get(i1).getWidth().intValue()));
+                    XWPFRun run = paragraphs.get(0).createRun();
+                    paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
+                    paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
+                    run = paragraphs.get(0).createRun();
+                    run.setText(collect.get(i1).getText());
+                    run.setFontSize((int) Math.round(10.5));
+                    if (i == 0 && i1 == 1) {
+                        run.setFontSize(16);
+                        run.setBold(true);
+                    } else if (i == 0) {
+                        run.setBold(true);
+                    }
+                    run.setFontFamily("宋体");
+                    run.setColor("000000");
+                    //run.setBold(true);
+                    carRow.getCell(i1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+                    if (collect.size() < 24) {
+                        mergeHorizontal(table, i, collect.size() - 1, 23);
+                    }
                 }
             }
         }
@@ -585,16 +745,16 @@ public class Demo1 {
     }
 
     @Test
-     public void demo05(){
-        List<Student> list=new ArrayList<>();
-        list.add(new Student(1,"张三","60.50"));
-        list.add(new Student(1,"张三","70.25"));
-        list.add(new Student(1,"张三","80.25"));
-        list.add(new Student(2,"李四","60"));
+    public void demo05() {
+        List<Student> list = new ArrayList<>();
+        list.add(new Student(1, "张三", 60.50));
+        list.add(new Student(1, "张三", 70.25));
+        list.add(new Student(1, "张三", 80.25));
+        list.add(new Student(2, "李四", 60D));
         System.out.println(list);
-        List<Student> studentList=new ArrayList<>();
-        list.parallelStream().collect(Collectors.groupingBy(o -> (o.getUid()+o.getUname()),Collectors.toList())).forEach((id,transfer)->{
-            transfer.stream().reduce((a,b)->new Student(a.getUid(),a.getUname(),a.getScore()+b.getScore())).ifPresent(studentList::add);
+        List<Student> studentList = new ArrayList<>();
+        list.parallelStream().collect(Collectors.groupingBy(o -> (o.getUid() + o.getUname()), Collectors.toList())).forEach((id, transfer) -> {
+            transfer.stream().reduce((a, b) -> new Student(a.getUid(), a.getUname(), a.getScore() + b.getScore())).ifPresent(studentList::add);
         });
         for (Student student : studentList) {
             System.out.println(student);
@@ -609,6 +769,27 @@ public class Demo1 {
         XWPFDocument docx = new XWPFDocument(is);
         System.out.println(docx.getDocument());
 
+    }
+
+    @Test
+    public void demo07() {
+        List<Student> list = new ArrayList<>();
+        list.add(new Student(1, "张三", 60.50));
+        list.add(new Student(1, "张三", 70.25));
+        list.add(new Student(1, "张三", 80.25));
+        list.add(new Student(2, "李四", 60D));
+
+        Map<Student, Student> map = new HashMap<Student, Student>();
+        for (Student s : list) {
+            if (map.containsKey(s)) {
+                map.put(s, Student.merge(s, map.get(s)));
+            } else {
+                map.put(s, s);
+            }
+        }
+        Collection<Student> values = map.values();
+        values.forEach(System.out::println);
+        System.out.println(System.getProperty("user.dir"));
     }
 
 
