@@ -321,7 +321,6 @@ public class WordUtil {
                         stringListMap.put(code,list);
                     }
                 }
-                //System.out.println(stringListMap);
                 Set<Map.Entry<String, List<WordTableCell>>> entries = stringListMap.entrySet();
                 Iterator<Map.Entry<String, List<WordTableCell>>> iterator = entries.iterator();
                 List<WordTableCell> resultList = new ArrayList<>();

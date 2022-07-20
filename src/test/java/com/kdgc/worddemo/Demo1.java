@@ -666,7 +666,7 @@ public class Demo1 {
 
     @Test
     public void demo04() throws IOException {
-        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\模板01.docx");
         //首先拿到最外层的对象
         WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
         //取出最外层对象中的表格集合
@@ -674,16 +674,22 @@ public class Demo1 {
         //拿到表格总共多少行 和 表格的宽度
         int allRow = 0;
         Float allWidth = 0f;
+        int colspan = 0;
+        int rowspan = 0;
         for (WordTable wordTable : wordTableList) {
             allWidth = wordTable.getWidth();
             List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
-            List<WordTableCell> collect = wordTableCellList.stream().filter(CollectionUtilsPan.distinctByKey(WordTableCell::getRow)).collect(Collectors.toList());
+            Map<Integer, List<Integer>> collect = wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.mapping(WordTableCell::getColspan, Collectors.toList())));
+            List<Integer> integers = collect.get(0);
+            for (Integer integer : integers) {
+                colspan += integer;
+            }
             allRow = collect.size();
         }
         //创建word对象
         XWPFDocument docx = new XWPFDocument();
         //创建表格
-        XWPFTable table = docx.createTable(allRow, 24);
+        XWPFTable table = docx.createTable(allRow, colspan);
         //获取表格属性
         CTTblPr tablePr = table.getCTTbl().addNewTblPr();
         //表格宽度
@@ -712,30 +718,57 @@ public class Demo1 {
                 XWPFTableRow carRow = table.getRow(i);
                 //第几个单元格
                 for (int i1 = 0; i1 < collect.size(); i1++) {
+                    rowspan = collect.get(i1).getRowspan();
+
                     List<XWPFParagraph> paragraphs = carRow.getCell(i1).getParagraphs();
+                    String text = collect.get(i1).getText();
+                    String[] split = text.split("\n");
                     //设置单元格高度
                     carRow.setHeight(collect.get(i1).getHeight().intValue());
                     //设置单元格宽度
                     carRow.getCell(i1).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(collect.get(i1).getWidth().intValue()));
-                    XWPFRun run = paragraphs.get(0).createRun();
-                    paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
-                    paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
-                    run = paragraphs.get(0).createRun();
-                    run.setText(collect.get(i1).getText());
-                    run.setFontSize((int) Math.round(10.5));
-                    if (i == 0 && i1 == 1) {
-                        run.setFontSize(16);
-                        run.setBold(true);
-                    } else if (i == 0) {
-                        run.setBold(true);
+                    for (int i2 = split.length; i2 > 0 ; i2--) {
+                        if (i2 == 0){
+                            paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
+                            paragraphs.get(0).setVerticalAlignment(TextAlignment.CENTER);
+                            XWPFRun run = paragraphs.get(0).createRun();
+                            run.setText(split[i2-1]);
+                            run.setFontSize((int) Math.round(10.5));
+                            if (i == 0 && i1 == 1) {
+                                run.setFontSize(16);
+                                run.setBold(true);
+                            } else if (i == 0) {
+                                run.setBold(true);
+                            }
+                            run.setFontFamily("宋体");
+                            run.setColor("000000");
+                            //run.setBold(true);
+                        }else {
+                            XmlCursor cursor = paragraphs.get(0).getCTP().newCursor();
+                            XWPFParagraph newParagraph = carRow.getCell(i1).insertNewParagraph(cursor);
+
+                            newParagraph.setAlignment(ParagraphAlignment.CENTER);
+                            newParagraph.setVerticalAlignment(TextAlignment.CENTER);
+                            XWPFRun run = newParagraph.createRun();
+                            run.setText(split[i2-1]);
+                            run.setFontSize((int) Math.round(10.5));
+                            if (i == 0 && i1 == 1) {
+                                run.setFontSize(16);
+                                run.setBold(true);
+                            } else if (i == 0) {
+                                run.setBold(true);
+                            }
+                            run.setFontFamily("宋体");
+                            run.setColor("000000");
+                            //run.setBold(true);
+                        }
+
                     }
-                    run.setFontFamily("宋体");
-                    run.setColor("000000");
-                    //run.setBold(true);
                     carRow.getCell(i1).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
-                    if (collect.size() < 24) {
-                        mergeHorizontal(table, i, collect.size() - 1, 23);
+                    if (collect.size() < colspan) {
+                        mergeHorizontal(table, i, collect.size() - 1, colspan-1);
                     }
+
                 }
             }
         }
@@ -745,29 +778,131 @@ public class Demo1 {
     }
 
     @Test
-    public void demo05() {
-        List<Student> list = new ArrayList<>();
-        list.add(new Student(1, "张三", 60.50));
-        list.add(new Student(1, "张三", 70.25));
-        list.add(new Student(1, "张三", 80.25));
-        list.add(new Student(2, "李四", 60D));
-        System.out.println(list);
-        List<Student> studentList = new ArrayList<>();
-        list.parallelStream().collect(Collectors.groupingBy(o -> (o.getUid() + o.getUname()), Collectors.toList())).forEach((id, transfer) -> {
-            transfer.stream().reduce((a, b) -> new Student(a.getUid(), a.getUname(), a.getScore() + b.getScore())).ifPresent(studentList::add);
-        });
-        for (Student student : studentList) {
-            System.out.println(student);
+    public void demo05() throws IOException {
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\wordTest.docx");
+        //首先拿到最外层的对象
+        WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
+        //取出最外层对象中的表格集合
+        List<WordTable> wordTableList = wordContent.getWordTableList();
+        //拿到表格总共多少行 和 表格的宽度
+        int allRow = 0;
+        Float allWidth = 0f;
+        int colspan = 0;
+        int rowspan = 0;
+        for (WordTable wordTable : wordTableList) {
+            allWidth = wordTable.getWidth();
+            List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
+            Map<Integer, List<Integer>> collect = wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.mapping(WordTableCell::getColspan, Collectors.toList())));
+            List<Integer> integers = collect.get(0);
+            for (Integer integer : integers) {
+                colspan += integer;
+            }
+            allRow = collect.size();
         }
+        //创建word对象
+        XWPFDocument docx = new XWPFDocument();
+        //创建表格
+        XWPFTable table = docx.createTable(allRow, colspan);
+        //获取表格属性
+        CTTblPr tablePr = table.getCTTbl().addNewTblPr();
+        //表格宽度
+        CTJc cTJc = tablePr.addNewJc();
+        //居中
+        cTJc.setVal(STJc.CENTER);
+        //设置上下左右页边距
+        table.setTopBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setLeftBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setRightBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        table.setBottomBorder(XWPFTable.XWPFBorderType.SINGLE, 20, 0, "");
+        //列宽自动分割
+        CTTblWidth tableWidth = tablePr.addNewTblW();
+        //设置表格宽度且自适应调整
+        tableWidth.setType(STTblWidth.DXA);
+        tableWidth.setW(BigInteger.valueOf(allWidth.intValue()));
+        for (WordTable wordTable : wordTableList) {
+            List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
+            for (WordTableCell wordTableCell : wordTableCellList) {
+                Integer row = wordTableCell.getRow();
+                Integer col = wordTableCell.getCol();
+                Integer rowspan1 = wordTableCell.getRowspan();
+                Integer colspan1 = wordTableCell.getColspan();
+                XWPFTableRow carow = table.getRow(row);
+                XWPFTableCell cell = carow.getCell(col);
+//                mergeHorizontal(table,3,1,6);
+//                mergeHorizontal(table,3,6,7);
+//                mergeHorizontal(table,3,8,23);
+                if (rowspan1 != 1 && colspan1 == 1){
+                    mergeVertically(table,col,row,rowspan1+row-1);
+                }
+                if (colspan1 != 1 && rowspan1 == 1){
+                    mergeHorizontal(table,row,col,col+colspan1-1);
+                }
+                if (colspan1 != 1 && rowspan1 != 1){
+                    mergeVertically(table,col,row,rowspan1+row-1);
+                    for (int i = 0; i < rowspan1; i++) {
+                        mergeHorizontal(table,row+i,col,col+colspan1-1);
+                    }
+                }
+                List<XWPFParagraph> paragraphs = cell.getParagraphs();
+                String text = wordTableCell.getText();
+                if (text.startsWith("\n\n")){
+                    text = text.substring(2, text.length() - 1);
+                }
+                String[] split = text.split("\n");
+                carow.setHeight(wordTableCell.getHeight().intValue());
+                carow.getCell(col).getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(wordTableCell.getWidth().intValue()));
+                for (int i = split.length; i > 0; i--) {
+                    XmlCursor cursor = paragraphs.get(0).getCTP().newCursor();
+                    XWPFParagraph newParagraph = carow.getCell(col).insertNewParagraph(cursor);
+                    paragraphs.get(0).setAlignment(ParagraphAlignment.CENTER);
+                    XWPFRun run = newParagraph.createRun();
+                    run.setText(split[i-1]);
+                    run.setFontSize(11);
+                    run.setFontFamily("宋体");
+                    run.setColor("000000");
+                }
+                carow.getCell(col).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+            }
+        }
+        FileOutputStream os = new FileOutputStream("C:\\Users\\pengxiaokang\\Desktop\\demo05.docx");
+        docx.write(os);
+        os.close();
     }
 
     @Test
     public void demo06() throws IOException {
-        String path = "C:\\Users\\pengxiaokang\\Desktop\\模板01.docx";
-        File file = new File(path);
-        InputStream is = new FileInputStream(file);
-        XWPFDocument docx = new XWPFDocument(is);
-        System.out.println(docx.getDocument());
+        File file = new File("C:\\Users\\pengxiaokang\\Desktop\\模板01.docx");
+        //首先拿到最外层的对象
+        WordContent wordContent = WordUtil.adaptDocxToPdfTable(file);
+        //取出最外层对象中的表格集合
+        List<WordTable> wordTableList = wordContent.getWordTableList();
+        //拿到表格总共多少行 和 表格的宽度
+        int allRow = 0;
+        Float allWidth = 0f;
+        int colspan = 0;
+        int rowspan = 0;
+        for (WordTable wordTable : wordTableList) {
+            allWidth = wordTable.getWidth();
+            List<WordTableCell> wordTableCellList = wordTable.getWordTableCellList();
+            Map<Integer, List<Integer>> collect = wordTableCellList.parallelStream().collect(Collectors.groupingBy(WordTableCell::getRow, Collectors.mapping(WordTableCell::getColspan, Collectors.toList())));
+            List<Integer> integers = collect.get(0);
+            for (Integer integer : integers) {
+                colspan += integer;
+            }
+            allRow = collect.size();
+        }
+        //创建word对象
+        XWPFDocument docx = new XWPFDocument();
+        //创建表格
+        XWPFTable table = docx.createTable(allRow, colspan);
+
+        mergeHorizontal(table,1,2,5);
+        mergeHorizontal(table,2,2,5);
+        mergeVertically(table,1,1,5);
+
+        FileOutputStream os = new FileOutputStream("C:\\Users\\pengxiaokang\\Desktop\\demo06.docx");
+        docx.write(os);
+        os.close();
 
     }
 
@@ -793,6 +928,15 @@ public class Demo1 {
     }
 
 
+    @Test
+    public void demo08(){
+        String s = "工\n程\n内\n容";
+        String[] split = s.split("\n");
+        for (int i = split.length; i > 0; i--) {
+            System.out.println(split[i-1]);
+        }
+    }
+
     //合并列
     public void mergeVertically(XWPFTable table, int col, int fromRow, int toRow) {
         for (int rowIndex = fromRow; rowIndex <= toRow; rowIndex++) {
@@ -804,7 +948,7 @@ public class Demo1 {
             }
         }
         //合并后垂直居中
-        table.getRow(fromRow).getCell(col).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+        //table.getRow(fromRow).getCell(col).setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
     }
 
     //合并行
